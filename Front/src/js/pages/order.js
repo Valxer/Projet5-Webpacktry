@@ -48,6 +48,7 @@ class Order {
       html = errorHTML();
     }
     this.domTarget.innerHTML = html;
+    this.listenQty(i);
     this.displayTotal(total);
   }
 
@@ -64,7 +65,7 @@ class Order {
    * @returns {String}						HTML text to implement
    */
   itemHTML(item) {
-    return `
+    const html = `
     <div class="orderItem">
       <figure class="orderItem__image">
         <img src="${item.imageUrl}" alt="ours ${item.number}">
@@ -72,23 +73,20 @@ class Order {
       <div class="orderItem__details">
         <h3>${item.name}</h3>
         <div class="howMany">
-            <i class="${item._id} fas fa-minus" onclick="data.Page.subOne('${
-              item._id
-            }')"></i>
+            <i class="${item._id} fas fa-minus" id="minus${item.number}"></i>
           <input type="number" disabled class="field" value="${
             item.howMany
           }" aria-label="Nombre d'ours voulus">
-            <i class="${item._id} fas fa-plus" onclick="data.Page.addOne('${
-              item._id
-            }')"></i>
+            <i class="${item._id} fas fa-plus" id="plus${item.number}"></i>
         </div>
         <p>${(item.howMany * item.price) / 100},00€</p>
-        <i class="${item._id} fas fa-trash-alt trashIcon" onclick="data.Page.trashItem('${
-          item._id
-        }')"></i>
+        <i class="${item._id} fas fa-trash-alt trashIcon" id="trash${
+      item.number
+    }"></i>
       </div>
     </div>
 	`;
+    return html;
   }
 
   /**
@@ -109,6 +107,45 @@ class Order {
     `;
   }
 
+  listenQty(nbrItems) {
+    for (let i = 1; i <= nbrItems; i++) {
+      document
+        .getElementById(`plus${i}`)
+        .addEventListener("click", function (e) {
+          const itemId = document.getElementById(`plus${i}`).classList[0];
+          data.Cart.add(itemId);
+          data.Page.content[itemId].howMany++;
+          data.Page.displayOrder();
+        });
+      document
+        .getElementById(`minus${i}`)
+        .addEventListener("click", function (e) {
+          const itemId = document.getElementById(`minus${i}`).classList[0];
+          data.Cart.sub(itemId);
+          if (data.Page.content[itemId].howMany == 1) {
+            if (confirm("Voulez vous vraiment abandonner cet ourson ?")) {
+              data.Cart.delete(itemId);
+              delete data.Page.content[itemId];
+              data.Page.displayOrder();
+            }
+          } else {
+            data.Page.content[itemId].howMany--;
+            data.Page.displayOrder();
+          }
+        });
+      document
+        .getElementById(`trash${i}`)
+        .addEventListener("click", function (e) {
+          const itemId = document.getElementById(`trash${i}`).classList[0];
+          if (confirm("Voulez vous vraiment abandonner cet ourson ?")) {
+            data.Cart.delete(itemId);
+            delete data.Page.content[itemId];
+            data.Page.displayOrder();
+          }
+        });
+    }
+  }
+
   /**
    * Displays the total price if the user has something in his cart
    * @param {Number} total  Total price of the cart the user desires
@@ -121,7 +158,7 @@ class Order {
           <p><span id="total">${total}</span>,00€</p>
         </div>
     `;
-    else document.querySelector("tfoot.orderPrice").innerHTML = ``;
+    else document.querySelector("div.orderPrice").innerHTML = ``;
     this.displayForm(total);
   }
 
@@ -167,7 +204,11 @@ class Order {
       document.getElementById("orderGlobal").classList.add("enabled");
       this.previousUser();
       this.listen(total);
-    } else document.getElementById("orderForm").innerHTML = ``;
+    } else {
+      document.getElementById("orderFinal").classList.remove("enabled");
+      document.getElementById("orderGlobal").classList.remove("enabled");
+      document.getElementById("orderFormContainer").innerHTML = ``;
+    }
   }
 
   /**
@@ -250,7 +291,7 @@ class Order {
   /**
    * Regroups all infos concerning the order and sends them under a string format to be used for a fetch request
    */
-   validOrder() {
+  validOrder() {
     let contact = {
       firstName: document.getElementById("firstName").value,
       lastName: document.getElementById("lastName").value,
