@@ -1,0 +1,36 @@
+// Color Theme Swatches in Hex ===
+$Mauve: #bca5c7;
+$Purple: #82449e;
+$Lilas: #e2e0f1;
+$Wheat: #f2db8d;
+$Brownish: #96896e;
+$Text: #221E24;
+
+// Teddybears Colors ==============
+$tan: tan;
+$chocolate: chocolate;
+$black: $Text;
+$white: wheat;
+$paleBrown: #987654;
+$darkBrown: #654321;
+$brown: brown;
+$blue: blue;
+$pink: pink;
+$beige: beige;
+
+// Breakpoints ====================
+$breakpoints: (
+  phone: 767px,
+  tablet-min: 768px,
+  tablet-max: 1024px,
+  desktop: 1025px,
+  desktop-max: 1439px,
+  bigscreen: 1440px
+);
+
+// Nbr d'items à display ===========
+$itemnbr: 5;
+$deksrow: 2;
+$deskcolumn: 6;
+$tabletrow: 3;
+$tabletcolumn: 4;
